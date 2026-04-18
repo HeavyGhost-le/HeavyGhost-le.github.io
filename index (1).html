@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeavyGhost0x00 // Red Teamer</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --bg2: #0a0a0f;
+    --bg3: #0f0f16;
+    --accent: #00ff88;
+    --accent2: #00ccff;
+    --accent3: #ff4466;
+    --text: #c8d0e0;
+    --text-dim: #5a6478;
+    --border: rgba(0,255,136,0.15);
+    --border2: rgba(0,204,255,0.1);
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s;
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 28px; height: 28px;
+    border: 1px solid rgba(0,255,136,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.05) 2px,
+      rgba(0,0,0,0.05) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(5,5,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .nav-logo span { color: var(--text-dim); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  section {
+    position: relative;
+    z-index: 2;
+    padding: 6rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 8rem;
+    max-width: 100%;
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: var(--sans);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.4s forwards;
+  }
+  .hero-name .ghost { color: var(--accent); }
+  .hero-name .hex { color: var(--text-dim); font-size: 0.5em; vertical-align: middle; }
+
+  .hero-role {
+    font-family: var(--mono);
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    color: var(--accent2);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.6s forwards;
+  }
+  .hero-role .sep { color: var(--text-dim); margin: 0 0.7rem; }
+
+  .hero-bio {
+    max-width: 600px;
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.8s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 1s forwards;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.75rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    border: 1px solid var(--accent);
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid rgba(90,100,120,0.4);
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* terminal blink */
+  .blink {
+    animation: blink 1s step-end infinite;
+    color: var(--accent);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* decorative hex */
+  .hero-deco {
+    position: absolute;
+    right: 6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+  }
+  .hex-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 44px);
+    gap: 6px;
+  }
+  .hex-cell {
+    width: 44px; height: 44px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: all 0.3s;
+  }
+  .hex-cell.lit { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.3); color: var(--accent); }
+  .hex-cell.lit2 { background: rgba(0,204,255,0.06); border-color: rgba(0,204,255,0.25); color: var(--accent2); }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    font-family: var(--sans);
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .about-text p {
+    color: var(--text-dim);
+    line-height: 1.9;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+  }
+  .about-text p strong { color: var(--text); font-weight: 600; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    border: 1px solid var(--border);
+  }
+  .stat-box {
+    padding: 1.5rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .stat-box:hover { background: rgba(0,255,136,0.04); }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ARSENAL */
+  .arsenal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .arsenal-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .arsenal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s;
+  }
+  .arsenal-card:hover { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
+  .arsenal-card:hover::before { height: 100%; }
+
+  .arsenal-card.blue::before { background: var(--accent2); }
+  .arsenal-card.blue:hover { border-color: rgba(0,204,255,0.3); background: rgba(0,204,255,0.03); }
+  .arsenal-card.red::before { background: var(--accent3); }
+  .arsenal-card.red:hover { border-color: rgba(255,68,102,0.3); background: rgba(255,68,102,0.03); }
+
+  .arsenal-icon {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .arsenal-card.blue .arsenal-icon { color: var(--accent2); }
+  .arsenal-card.red .arsenal-icon { color: var(--accent3); }
+
+  .arsenal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+  .tool-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tool-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .tool-tag:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .tool-tag.primary {
+    background: rgba(0,255,136,0.08);
+    border-color: rgba(0,255,136,0.25);
+    color: var(--accent);
+  }
+
+  /* TECHNIQUES */
+  .ttp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .ttp-table thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .ttp-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 400;
+  }
+  .ttp-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .ttp-table tr:hover td { background: rgba(0,255,136,0.02); }
+  .ttp-table tr:hover td:first-child { color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-red { background: rgba(255,68,102,0.12); color: var(--accent3); border: 1px solid rgba(255,68,102,0.2); }
+  .badge-blue { background: rgba(0,204,255,0.1); color: var(--accent2); border: 1px solid rgba(0,204,255,0.2); }
+  .badge-green { background: rgba(0,255,136,0.08); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
+
+  /* CONTACT */
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .contact-text h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .contact-text h3 span { color: var(--accent); }
+  .contact-text p { color: var(--text-dim); line-height: 1.8; }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .contact-link:hover {
+    border-color: rgba(0,255,136,0.3);
+    color: var(--accent);
+    background: rgba(0,255,136,0.04);
+  }
+  .contact-link-icon {
+    width: 32px; height: 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid var(--border);
+    padding: 2rem 6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+  footer .accent { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* TERMINAL LINE */
+  .terminal-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 3rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg2);
+    border-left: 2px solid var(--accent);
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-line .prompt { color: var(--accent); margin-right: 0.5rem; }
+  .terminal-line .cmd { color: var(--accent2); }
+  .terminal-line .output { color: var(--text-dim); display: block; margin-top: 4px; padding-left: 1.2rem; }
+
+  /* CERTIFICATIONS */
+  .certs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .cert-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.75rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+  .cert-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .cert-card:hover { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
+  .cert-card:hover::after { transform: scaleX(1); }
+  .cert-card.blue::after { background: var(--accent2); }
+  .cert-card.blue:hover { border-color: rgba(0,204,255,0.3); background: rgba(0,204,255,0.03); }
+  .cert-card.pending::after { background: rgba(255,180,0,0.8); }
+  .cert-card.pending { border-style: dashed; }
+  .cert-card.pending:hover { border-color: rgba(255,180,0,0.4); background: rgba(255,180,0,0.03); }
+
+  .cert-status {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cert-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cert-status.in-progress .dot {
+    background: rgba(255,180,0,0.9);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .cert-status .label-earned { color: var(--accent); }
+  .cert-status .label-progress { color: rgba(255,180,0,0.9); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,180,0,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(255,180,0,0); }
+  }
+
+  .cert-name {
+    font-family: var(--sans);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.02em;
+  }
+  .cert-full {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+  .cert-issuer {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cert-issuer span { color: var(--text); }
+
+  @media (max-width: 768px) {
+    .certs-grid { grid-template-columns: 1fr; }
+  }
+    #hero { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .hero-deco { display: none; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.5rem; }
+    section { padding: 4rem 1.5rem; }
+    .about-grid, .contact-inner { grid-template-columns: 1fr; }
+    .arsenal-grid { grid-template-columns: 1fr; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>//</span> HeavyGhost<span style="color:var(--accent)">0x00</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#arsenal">Arsenal</a></li>
+    <li><a href="#techniques">TTPs</a></li>
+    <li><a href="#certs">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div style="position:relative;">
+    <p class="hero-tag">// Red Teamer &amp; Adversary Simulation</p>
+    <h1 class="hero-name">
+      Heavy<span class="ghost">Ghost</span><span class="hex">0x00</span>
+    </h1>
+    <p class="hero-role">
+      Active Directory Security<span class="sep">/</span>Red Teaming<span class="sep">/</span>Web Penetration Testing
+    </p>
+    <p class="hero-bio">
+      Adversary simulation specialist focused on Active Directory exploitation, C2 infrastructure, and web application security. Operating in the shadows of enterprise networks — finding the paths defenders miss.
+    </p>
+    <div class="hero-cta">
+      <a href="#arsenal" class="btn btn-primary">View Arsenal</a>
+      <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+    </div>
+
+    <!-- decorative hex grid -->
+    <div class="hero-deco">
+      <div class="hex-grid" id="hexGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">About</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <div class="terminal-line">
+        <span class="prompt">ghost@redteam:~$</span><span class="cmd">whoami</span>
+        <span class="output">Red Teamer · AD Specialist · Web Sec Researcher</span>
+      </div>
+      <p>I specialize in <strong>adversary simulation</strong> — emulating real-world threat actors to expose the gaps in enterprise security posture before attackers do.</p>
+      <p>My primary domain is <strong>Active Directory</strong>: privilege escalation paths, Kerberos abuse, ACL exploitation, and domain persistence. I combine AD tradecraft with <strong>Sliver C2</strong> for realistic engagements.</p>
+      <p>On the web side, I hunt for vulnerabilities that chain into full compromise — from initial access to internal pivot.</p>
+    </div>
+    <div class="reveal">
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-num">AD</div>
+          <div class="stat-label">Primary Focus</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:var(--accent2);">C2</div>
+          <div class="stat-label">Sliver Framework</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:var(--accent3);">Web</div>
+          <div class="stat-label">App Pentesting</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">RT</div>
+          <div class="stat-label">Red Teaming</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARSENAL -->
+<section id="arsenal">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Arsenal</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="arsenal-grid">
+    <div class="arsenal-card reveal">
+      <div class="arsenal-icon">// C2 &amp; Post-Exploitation</div>
+      <div class="arsenal-title">Command &amp; Control</div>
+      <div class="tool-list">
+        <span class="tool-tag primary">Sliver</span>
+        <span class="tool-tag">Metasploit</span>
+        <span class="tool-tag">Cobalt Strike</span>
+        <span class="tool-tag">Havoc</span>
+        <span class="tool-tag">Villain</span>
+      </div>
+    </div>
+    <div class="arsenal-card blue reveal">
+      <div class="arsenal-icon" style="color:var(--accent2);">// Active Directory</div>
+      <div class="arsenal-title">AD Exploitation</div>
+      <div class="tool-list">
+        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)">BloodHound</span>
+        <span class="tool-tag">Impacket</span>
+        <span class="tool-tag">CrackMapExec</span>
+        <span class="tool-tag">Rubeus</span>
+        <span class="tool-tag">Mimikatz</span>
+        <span class="tool-tag">PowerView</span>
+        <span class="tool-tag">Kerbrute</span>
+        <span class="tool-tag">Responder</span>
+      </div>
+    </div>
+    <div class="arsenal-card red reveal">
+      <div class="arsenal-icon" style="color:var(--accent3);">// Web Security</div>
+      <div class="arsenal-title">Web Penetration</div>
+      <div class="tool-list">
+        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)">Burp Suite</span>
+        <span class="tool-tag">FFUF</span>
+        <span class="tool-tag">Nikto</span>
+        <span class="tool-tag">SQLmap</span>
+        <span class="tool-tag">Feroxbuster</span>
+        <span class="tool-tag">Nuclei</span>
+      </div>
+    </div>
+    <div class="arsenal-card reveal">
+      <div class="arsenal-icon">// Recon &amp; OSINT</div>
+      <div class="arsenal-title">Reconnaissance</div>
+      <div class="tool-list">
+        <span class="tool-tag">Nmap</span>
+        <span class="tool-tag">Netexec</span>
+        <span class="tool-tag">Amass</span>
+        <span class="tool-tag">theHarvester</span>
+        <span class="tool-tag">Shodan</span>
+        <span class="tool-tag">Subfinder</span>
+      </div>
+    </div>
+    <div class="arsenal-card blue reveal">
+      <div class="arsenal-icon" style="color:var(--accent2);">// Languages</div>
+      <div class="arsenal-title">Scripting &amp; Dev</div>
+      <div class="tool-list">
+        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)">Python</span>
+        <span class="tool-tag">PowerShell</span>
+        <span class="tool-tag">Bash</span>
+        <span class="tool-tag">Go</span>
+        <span class="tool-tag">C#</span>
+      </div>
+    </div>
+    <div class="arsenal-card red reveal">
+      <div class="arsenal-icon" style="color:var(--accent3);">// Platform</div>
+      <div class="arsenal-title">OS &amp; Environment</div>
+      <div class="tool-list">
+        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)">Kali Linux</span>
+        <span class="tool-tag">Parrot OS</span>
+        <span class="tool-tag">Windows</span>
+        <span class="tool-tag">VMware</span>
+        <span class="tool-tag">Docker</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNIQUES -->
+<section id="techniques">
+  <div class="section-header reveal">
+    <span class="section-num">03</span>
+    <h2 class="section-title">TTPs</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="reveal">
+    <table class="ttp-table">
+      <thead>
+        <tr>
+          <th>Technique</th>
+          <th>MITRE ATT&amp;CK</th>
+          <th>Category</th>
+          <th>Primary Tools</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Kerberoasting</td>
+          <td>T1558.003</td>
+          <td><span class="badge badge-red">Credential Access</span></td>
+          <td>Rubeus, Impacket</td>
+        </tr>
+        <tr>
+          <td>AS-REP Roasting</td>
+          <td>T1558.004</td>
+          <td><span class="badge badge-red">Credential Access</span></td>
+          <td>Rubeus, GetNPUsers</td>
+        </tr>
+        <tr>
+          <td>Pass-the-Hash</td>
+          <td>T1550.002</td>
+          <td><span class="badge badge-blue">Lateral Movement</span></td>
+          <td>CrackMapExec, Impacket</td>
+        </tr>
+        <tr>
+          <td>Pass-the-Ticket</td>
+          <td>T1550.003</td>
+          <td><span class="badge badge-blue">Lateral Movement</span></td>
+          <td>Mimikatz, Rubeus</td>
+        </tr>
+        <tr>
+          <td>DCSync</td>
+          <td>T1003.006</td>
+          <td><span class="badge badge-red">Credential Access</span></td>
+          <td>Mimikatz, Impacket</td>
+        </tr>
+        <tr>
+          <td>LLMNR/NBT-NS Poisoning</td>
+          <td>T1557.001</td>
+          <td><span class="badge badge-red">Credential Access</span></td>
+          <td>Responder</td>
+        </tr>
+        <tr>
+          <td>ACL Abuse</td>
+          <td>T1222</td>
+          <td><span class="badge badge-green">Privilege Escalation</span></td>
+          <td>PowerView, BloodHound</td>
+        </tr>
+        <tr>
+          <td>Golden Ticket</td>
+          <td>T1558.001</td>
+          <td><span class="badge badge-green">Persistence</span></td>
+          <td>Mimikatz</td>
+        </tr>
+        <tr>
+          <td>C2 via Sliver</td>
+          <td>T1071</td>
+          <td><span class="badge badge-blue">Command &amp; Control</span></td>
+          <td>Sliver Framework</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certs">
+  <div class="section-header reveal">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Certifications</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="certs-grid">
+
+    <div class="cert-card pending reveal">
+      <div class="cert-status in-progress">
+        <div class="dot"></div>
+        <span class="label-progress">In Progress</span>
+      </div>
+      <div class="cert-name">OSCP</div>
+      <div class="cert-full">Offensive Security Certified Professional</div>
+      <div class="cert-issuer">Offensive Security <span>OffSec</span></div>
+    </div>
+
+    <div class="cert-card reveal">
+      <div class="cert-status">
+        <div class="dot"></div>
+        <span class="label-earned">Earned</span>
+      </div>
+      <div class="cert-name">CEH</div>
+      <div class="cert-full">Certified Ethical Hacker</div>
+      <div class="cert-issuer">EC-Council <span>EC-Council</span></div>
+    </div>
+
+    <div class="cert-card reveal">
+      <div class="cert-status">
+        <div class="dot"></div>
+        <span class="label-earned">Earned</span>
+      </div>
+      <div class="cert-name">CPTS</div>
+      <div class="cert-full">Certified Penetration Testing Specialist</div>
+      <div class="cert-issuer">HackTheBox Academy <span>HTB</span></div>
+    </div>
+
+    <div class="cert-card pending reveal">
+      <div class="cert-status in-progress">
+        <div class="dot"></div>
+        <span class="label-progress">In Progress</span>
+      </div>
+      <div class="cert-name">OSCP+</div>
+      <div class="cert-full">Offensive Security Certified Professional — renewed path</div>
+      <div class="cert-issuer">Offensive Security <span>OffSec</span></div>
+    </div>
+
+    <div class="cert-card pending blue reveal">
+      <div class="cert-status in-progress">
+        <div class="dot"></div>
+        <span class="label-progress">In Progress</span>
+      </div>
+      <div class="cert-name">CRTO</div>
+      <div class="cert-full">Certified Red Team Operator</div>
+      <div class="cert-issuer">Zero-Point Security <span>ZPS</span></div>
+    </div>
+
+    <div class="cert-card pending blue reveal">
+      <div class="cert-status in-progress">
+        <div class="dot"></div>
+        <span class="label-progress">In Progress</span>
+      </div>
+      <div class="cert-name">CRTL</div>
+      <div class="cert-full">Certified Red Team Lead</div>
+      <div class="cert-issuer">Zero-Point Security <span>ZPS</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Contact</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="contact-inner">
+    <div class="contact-text reveal">
+      <h3>Let's talk<br><span>red team.</span></h3>
+      <p>Available for red team engagements, AD security assessments, and collaborative research. Reach out through any of the channels listed.</p>
+    </div>
+    <div class="contact-links reveal">
+      <a href="https://github.com/HeavyGhost-le" class="contact-link" target="_blank">
+        <div class="contact-link-icon">GH</div>
+        github.com/HeavyGhost-le
+      </a>
+      <a href="https://www.linkedin.com/in/neku-e-30a16220a/" class="contact-link" target="_blank">
+        <div class="contact-link-icon">LI</div>
+        linkedin.com/in/neku-e-30a16220a
+      </a>
+      <a href="https://app.hackthebox.com/users/2106711" class="contact-link">
+        <div class="contact-link-icon">HB</div>
+        HackTheBox — HeavyGhost0x00
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><span class="accent">HeavyGhost0x00</span> // Red Teamer</p>
+  <p>Built with intent &amp; <span class="accent">0x</span>curiosity</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(1.6)';
+      ring.style.borderColor = 'rgba(0,255,136,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(1)';
+      ring.style.borderColor = 'rgba(0,255,136,0.4)';
+    });
+  });
+
+  // Hex grid generator
+  const hexCodes = ['A1','3F','FF','00','C2','7E','B4','19','D0','8A','4C','F1','6B','2D','93','E5','0F','77','AA','CB','11','5C','88','31','DE'];
+  const grid = document.getElementById('hexGrid');
+  if (grid) {
+    hexCodes.forEach((h, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'hex-cell' + (i % 7 === 0 ? ' lit' : i % 5 === 0 ? ' lit2' : '');
+      cell.textContent = h;
+      grid.appendChild(cell);
+      setInterval(() => {
+        if (Math.random() < 0.08) {
+          cell.textContent = Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2,'0');
+        }
+      }, 800 + i * 60);
+    });
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), 80 * [...reveals].indexOf(e.target) % 4);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
