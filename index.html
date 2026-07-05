@@ -450,6 +450,83 @@
   .badge-blue { background: rgba(0,204,255,0.1); color: var(--accent2); border: 1px solid rgba(0,204,255,0.2); }
   .badge-green { background: rgba(0,255,136,0.08); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
 
+  /* BLOG */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .blog-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+  }
+  .blog-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s;
+  }
+  .blog-card:hover { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
+  .blog-card:hover::before { height: 100%; }
+  
+  .blog-card.blue::before { background: var(--accent2); }
+  .blog-card.blue:hover { border-color: rgba(0,204,255,0.3); background: rgba(0,204,255,0.03); }
+  
+  .blog-card.red::before { background: var(--accent3); }
+  .blog-card.red:hover { border-color: rgba(255,68,102,0.3); background: rgba(255,68,102,0.03); }
+
+  .blog-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    gap: 1rem;
+  }
+  .blog-meta .date { color: var(--accent); }
+  .blog-meta .tag { color: var(--accent2); }
+  
+  .blog-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+    transition: color 0.2s;
+  }
+  .blog-card:hover .blog-title { color: var(--accent); }
+  .blog-card.blue:hover .blog-title { color: var(--accent2); }
+  .blog-card.red:hover .blog-title { color: var(--accent3); }
+  
+  .blog-excerpt {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+  
+  .blog-read-more {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .blog-card:hover .blog-read-more { color: var(--accent); }
+  .blog-card.blue:hover .blog-read-more { color: var(--accent2); }
+  .blog-card.red:hover .blog-read-more { color: var(--accent3); }
+
   /* CONTACT */
   .contact-inner {
     display: grid;
@@ -637,7 +714,7 @@
 
   @media (max-width: 768px) {
     .certs-grid { grid-template-columns: 1fr; }
-  }
+    .blog-grid { grid-template-columns: 1fr; }
     #hero { padding-left: 1.5rem; padding-right: 1.5rem; }
     .hero-deco { display: none; }
     nav { padding: 1rem 1.5rem; }
@@ -662,6 +739,7 @@
     <li><a href="#arsenal">Arsenal</a></li>
     <li><a href="#techniques">TTPs</a></li>
     <li><a href="#certs">Certs</a></li>
+    <li><a href="#blog">Blog</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
@@ -962,10 +1040,62 @@
   </div>
 </section>
 
+<!-- BLOG -->
+<section id="blog">
+  <div class="section-header reveal">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Blog &amp; Writeups</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="blog-grid">
+    
+    <a href="#" class="blog-card reveal">
+      <div class="blog-meta">
+        <span class="date">// 2026.06.12</span>
+        <span class="tag">Active Directory</span>
+      </div>
+      <div class="blog-title">Abusing ACLs for Privilege Escalation in AD</div>
+      <div class="blog-excerpt">A deep dive into misconfigured Access Control Lists in Active Directory and how attackers can leverage them to escalate privileges from a standard domain user to Domain Admin.</div>
+      <div class="blog-read-more">Read Writeup →</div>
+    </a>
+
+    <a href="#" class="blog-card blue reveal">
+      <div class="blog-meta">
+        <span class="date">// 2026.05.28</span>
+        <span class="tag">C2 Infrastructure</span>
+      </div>
+      <div class="blog-title">Deploying Sliver C2 with HTTPS Redirectors</div>
+      <div class="blog-excerpt">Setting up a resilient Command &amp; Control infrastructure using Sliver framework, complete with domain fronting and HTTPS redirectors to evade network defenses.</div>
+      <div class="blog-read-more">Read Writeup →</div>
+    </a>
+
+    <a href="#" class="blog-card red reveal">
+      <div class="blog-meta">
+        <span class="date">// 2026.04.15</span>
+        <span class="tag">Web Pentesting</span>
+      </div>
+      <div class="blog-title">Chaining SSRF to Internal Service Compromise</div>
+      <div class="blog-excerpt">Walkthrough of a recent web application assessment where an initial Server-Side Request Forgery vulnerability was chained to access internal metadata services and pivot into the cloud environment.</div>
+      <div class="blog-read-more">Read Writeup →</div>
+    </a>
+
+    <a href="#" class="blog-card reveal">
+      <div class="blog-meta">
+        <span class="date">// 2026.03.02</span>
+        <span class="tag">Kerberos</span>
+      </div>
+      <div class="blog-title">Kerberoasting vs. AS-REP Roasting: When to Use Which</div>
+      <div class="blog-excerpt">Comparing two of the most common Active Directory credential access techniques, analyzing their detection vectors, and discussing operational security considerations for red teamers.</div>
+      <div class="blog-read-more">Read Writeup →</div>
+    </a>
+
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section id="contact">
   <div class="section-header reveal">
-    <span class="section-num">05</span>
+    <span class="section-num">06</span>
     <h2 class="section-title">Contact</h2>
     <div class="section-line"></div>
   </div>
